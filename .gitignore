@@ -1,0 +1,15 @@
+# vscode related
+.vscode/*
+*.code-workspace
+
+# node.js
+**/node_modules/
+
+# Prosjektspesifikt
+## tsconfig er systemspesifikk
+tsconfig.json
+
+## build/ er unødvendig dobbelkode. bare bygg src
+**/build/*.js
+*.db
+*.sqlite
