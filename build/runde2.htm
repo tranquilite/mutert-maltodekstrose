@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IBE206 Øving 1 - Bridge</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        .handling_c { border: 1px solid gray; border-radius: 10px; background-color: #EEEEEE ; padding: 1em; margin: 1em;}
+        .respons_c { font-family: monospace; font-size: 10pt; margin: 1em;}
+    </style>
+    <script lang="text/js">
+        function start_spill() {
+            spillarr = [];
+            for (i = 1; i <= 4; i++) {  // smerte
+                spillarr.push(document.getElementById("spiller"+i.toString()).value);
+            }
+        const spiller_post = { "spillere": spillarr };
+
+        fetch("/bridge/start", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(spiller_post) } )
+        .then(response => { return response.json(); })
+        .then(data => {
+            document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2);
+            populer_handtabell(data);
+            });
+        }
+
+        function populer_handtabell(spillebord) {
+            let spha_t = document.getElementById("spiller_hand");
+            let tbody = spha_t.getElementsByTagName('tbody')[0];
+
+            // I declare exterminatus
+            while (tbody.firstChild) { tbody.removeChild(tbody.firstChild); }
+
+            for (spiller in spillebord) {
+                let neste_rad = tbody.insertRow();
+                let c1 = neste_rad.insertCell(0);
+                let c2 = neste_rad.insertCell(1);
+
+                c1.textContent = spiller;
+                c2.textContent = spillebord[spiller];
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Bridge tull</h1>
+    <p>Dette er ikke ment som frontend elns, bare en mockup for å teste ting uten at jeg må tenke for mye.</br>Oh, right. Memo til meg selv: Håndterer ikke spillere med samme navn.</p>
+    <div class="handling_c">
+        <input type="text" id="spiller1" value="Jens"><input type="text" id="spiller2" value="Per"><input type="text" id="spiller3" value="Silje"><input type="text" id="spiller4" value="Thomesine">
+        <button onclick="start_spill()">Start</button>
+        <div id="start_spill_c" class="respons_c">&nbsp;</div>
+    </div>
+    <div class="handling_c">
+        <table id="spiller_hand">
+            <thead>
+                <tr>
+                    <th style="width: 150px;">Spiller</th>
+                    <th>Hånd</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
