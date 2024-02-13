@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IBE206 Øving 1 - Bridge</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        .handling_c { border: 1px solid gray; border-radius: 10px; background-color: #EEEEEE ; padding: 1em; margin: 1em;}
+        .respons_c { font-family: monospace; font-size: 10pt; margin: 1em;}
+    </style>
+    <script lang="text/js">
+    function registrer_spillere() {
+        spillarr = [];
+        for (i = 1; i <= 4; i++) {  // smerte
+            spillarr.push(document.getElementById("spiller"+i.toString()).value);
+        }
+        const spiller_post = { "spillere": spillarr };
+        console.log(JSON.stringify(spiller_post));
+
+        fetch("/bridge/registrer", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(spiller_post) } )
+        .then(response => { return response.json(); })
+        .then(data => {
+            document.getElementById("start_spill_c").textContent = JSON.stringify(data);
+            bygg_handtabell(spillarr, "12"); });
+    }
+
+    function bygg_handtabell(spillere, spill) {  // Smerteeeeee
+        let spha_t = document.getElementById("spiller_hand");
+        let tbody = spha_t.getElementsByTagName('tbody')[0];
+
+        // I declare exterminatus
+        while (tbody.firstChild) { tbody.removeChild(tbody.firstChild); }
+        
+        for (dingus in spillere) {
+            let neste_rad = tbody.insertRow();
+            let c1 = neste_rad.insertCell(0);
+            let c2 = neste_rad.insertCell(1);
+            let c3 = neste_rad.insertCell(2);
+            let spillerid = "23";
+
+            neste_rad.id = dingus;
+
+
+            c1.textContent = spillere[dingus];
+            c2.innerHTML = `<button id="23" onclick="hent_hand(this, ${spill})">Hent hånd</button>`;
+            c3.id = "hand"+spillerid;
+        }
+    }
+
+
+    function hent_hand(kall, spill) {
+        fetch(`/bridge/${spill}/hand/${kall.id}`)
+        .then(resp => { return resp.json(); })
+        .then(data => { document.getElementById("hand"+kall.id).textContent = JSON.stringify(data); })
+    }
+
+    </script>
+</head>
+<body>
+    <h1>Bridge tull</h1>
+    <p>Dette er ikke ment som frontend elns, bare en mockup for å teste ting uten at jeg må tenke for mye.</p>
+    <div class="handling_c">
+        <input type="text" id="spiller1" value="Test"><input type="text" id="spiller2"><input type="text" id="spiller3"><input type="text" id="spiller4">
+        <button onclick="registrer_spillere()">Registrer spillere</button>
+        <div id="start_spill_c" class="respons_c">&nbsp;</div>
+    </div>
+    <div class="handling_c">
+        <table id="spiller_hand">
+            <thead>
+                <tr>
+                    <th style="width: 200px;">Spiller</th>
+                    <th style="width: 100px;">Hent</th>
+                    <th>Hånd</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
