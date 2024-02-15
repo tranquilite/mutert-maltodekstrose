@@ -11,9 +11,10 @@ app.use(function(inRequest: Request, inResponse: Response, inNext: NextFunction)
     inResponse.header("Access-Control-Allow-Headers",
                       "Origin,X-Requested-With,Content-Type,Accept");
     inNext();
-  });
+});
 
-function Trainwreck(err: any) { console.log(err); }  // fml
+// Bygger ut litt feilhåndtering
+function Trainwreck(err: any, tree: string='NA') { console.log(err); }  // fml
 
 
 /* =========================================================================
@@ -25,6 +26,10 @@ function Trainwreck(err: any) { console.log(err); }  // fml
     Forsøk å få til at den kan dele kort, telle poeng og la spillerne
     melde én melding og få ett svar (fra sin "makker")
    ========================================================================= */ 
+
+enum himmelretning { North, South, East, West }  // forenkling. Fordel: lag1, oddetall. lag2, partall.
+enum k_farge { Clubs, Diamonds, Hearts, Spades }  // Spades topp, Kløver bunnpoeng.
+enum bud_typer { NT, Clubs, Diamonds, Hearts, Spades, Pass, Double, Redouble }
 
 class Kort {
     private farge: string;  // __slots__
@@ -46,32 +51,49 @@ class Kort {
         return `${this.farge} ${this.verdi}`; }  // __str__
 }
 
-enum himmelretning { North, South, East, West }  // forenkling
+type Bud = {
+    rank: number;
+    bud: bud_typer;
+}
 
 class Spiller {
     public navn: string;
+    public id: number;
     public retning: himmelretning; 
-    public hand: Kort[];
+    private hand: Kort[];
+    protected bids: Bud[];  // arr av Bud; Bud er 2 Clubs *eller* 1 Double; Siste er praktisk ugyldig, men gyldig i datamodellen.
 
-    constructor(navn: string, hand: Kort[], himmelretning: himmelretning) {
+    constructor(navn: string, id: number, hand: Kort[], himmelretning: himmelretning) {
         this.navn = navn;
+        this.id = id;
         this.hand = hand;
         this.retning = himmelretning;
+        this.bids = [];
     }
 
     toString() { return `${this.navn} ( ${this.retning})`; }
+
+    // Los getters infernales
+    get_hand() { return this.hand; }
 }
 
 // PSYKE! Dette funker jo
-class SpillTilstand {
+class Spilltilstand {
     // Logikkdritt
     private spillere: Spiller[];
-    private poeng: {[key: string]: number};
+    private poeng: { [key: string]: number };
+    private runde: number;
 
-    constructor(spillere: Spiller[], poeng: {[key: string]: number}) {
+    constructor() {
+        this.spillere = []; this.poeng = {};  // Dummy
+        this.runde = 1;  // Ny runde gir selvfølgelig omstart på 1. runde
+    }
+
+    set_game_state(spillere: Spiller[], poeng: {[key: string]: number}) {
         this.spillere = spillere;
         this.poeng = poeng;
     }
+
 }
 
 function generer_kortstokk() {
@@ -81,9 +103,7 @@ function generer_kortstokk() {
                            "10", "J","D", "K", "A"]
 
     for (let farge of farger) {  // Hvis lat, overkompliser.
-        for (let verdi of valor) {
-            kortstokk.push(new Kort(farge, verdi));
-        }
+        for (let verdi of valor) { kortstokk.push(new Kort(farge, verdi)); }
     }
 
     // Stokk om. ..tror jeg. tbh husker jeg dette knapt
@@ -108,17 +128,30 @@ app.post("/bridge/start",
             for (let i = 0; i < 4; i++) {
                 const hand = kortstokk.slice( (13*i), (13*(i+1)) );
                 spillere.push(new Spiller(spillforesporsel[i],
+                                          i*4, // "TODO: ag skikkelige id-er"
                                           hand, i));
             }
+            SPILL.set_game_state(spillere, {});
             resp.send(spillere);
         } catch (inError) {
             Trainwreck(inError);
         }
 });
 
+app.post("/bridge/bid/:player_id",
+    (req: Request, resp: Response) => {
+        try {
 
+            resp.send( {"1": "1NT"});
+        } catch (inError) {
+            Trainwreck(inError);
+        }
+});
 
-
+app.get("/bridge/bid",
+    (req: Request, resp: Response) => {
+        // ...
+});
 
 
 // Håndter rooooot
@@ -128,4 +161,5 @@ app.get("/", async(req: Request, resp: Response) => {
 });
 
 // Fyr løs
+var SPILL = new Spilltilstand();  // NEI! Slem! Global var er ondskap
 app.listen(80, () => console.log("Kjører..") );
