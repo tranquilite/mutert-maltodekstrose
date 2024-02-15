@@ -8,88 +8,65 @@
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #4CAF50; color: white; }
         .handling_c { border: 1px solid gray; border-radius: 10px; background-color: #EEEEEE ; padding: 1em; margin: 1em;}
+        .endpoint { font-family: monospace; font-style: italic; font-size: 9pt; color: blue; margin-bottom: 1em;}
         .respons_c, .spiller-hand { font-family: monospace; font-size: 8pt; margin: 1em;}
+        #spiller_input { display: flex; flex-direction: row; align-items: flex-start;}
+        #spiller_input label {display: block; margin-right: 10px; font-size: 10pt;}
+        #spiller_input input { margin-right: 10px; width: 10ch;}
     </style>
-    <script lang="text/js">
-        // endless shitfuckery
-        // "Brought to you by the australien government"
-        function start_spill() {
-            spillarr = [];
-            for (i = 1; i <= 4; i++) {  // smerte
-                spillarr.push(document.getElementById("spiller"+i.toString()).value);
-            }
-        const spiller_post = { "spillere": spillarr };
-
-        fetch("/bridge/start", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(spiller_post) } )
-        .then(response => { return response.json(); })
-        .then(data => {
-
-            document.getElementById("start_spill_c").innerHTML = 
-                `<button id="btn_ss_call" onclick="document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2);">Vis svar</button>`;
-            document.getElementById("btn_ss_call").addEventListener("click", () => { document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2); });
-            populer_handtabell(data);
-            });
-        }
-
-        function populer_handtabell(spillebord) {
-            let spha_t = document.getElementById("spiller_hand");
-            let tbody = spha_t.getElementsByTagName('tbody')[0];
-
-            // I declare exterminatus
-            while (tbody.firstChild) { tbody.removeChild(tbody.firstChild); }
-
-            for (spiller in spillebord) {
-                spiller = spillebord[spiller];  // ugly hack
-
-                let neste_rad = tbody.insertRow();
-                let c1 = neste_rad.insertCell(0);
-                let c2 = neste_rad.insertCell(1);
-
-                c1.textContent = spiller.navn;
-                c2.textContent = JSON.stringify(spiller.hand, null, 2);
-                c2.classList.add("spiller-hand");
-
-                document.getElementById("spiller_hand").querySelector("tbody").style.display = "table-row-group";
-            }
-        }
-
-        // Oppstartsgreier.. Mer smerte :3
-        document.addEventListener("DOMContentLoaded", function() {
-            const thead = document.getElementById("spiller_hand").querySelector("thead");
-            const tbody = document.getElementById("spiller_hand").querySelector("tbody");
-
-            thead.addEventListener("click", function() {
-                tbody.style.display = (tbody.style.display === "none" || tbody.style.display === "") ? "table-row-group" : "none";
-            });
-        });
-    </script>
+    <script type="text/javascript" src="r3_frontend.jsx"></script>
 </head>
 <body>
     <h1>Bridge tull</h1>
     <p>Dette er ikke ment som frontend elns, bare en mockup for å teste ting uten at jeg må tenke for mye.</br>Oh, right. Memo til meg selv: Håndterer ikke spillere med samme navn.</p>
     <div class="handling_c">
-        <input type="text" id="spiller1" value="Jens"><input type="text" id="spiller2" value="Per"><input type="text" id="spiller3" value="Silje"><input type="text" id="spiller4" value="Thomesine">
-        <button onclick="start_spill()">Start</button>
-        <div id="start_spill_c" class="respons_c">&nbsp;</div>
-    </div>
-    <div class="handling_c">
-        <table id="spiller_hand">
+        <div class="endpoint">POST /bridge/start  {spillere: string[]} </div>
+        <div id="spiller_input">
+            <div><label for="spiller">Nord</label><input type="text" id="spiller1" value="Jens"></div>
+            <div><label for="spiller2">Sør</label><input type="text" id="spiller2" value="Per"></div>
+            <div><label for="spiller3">Øst</label><input type="text" id="spiller3" value="Silje"></div>
+            <div><label for="spiller4">Vest</label><input type="text" id="spiller4" value="Thomesine"></div>
+            <div><p></p><button onclick="start_spill()">Start</button></div>
+            <div id="start_spill_c" class="respons_c">&nbsp;</div>
+        </div>
+
+        <table id="spiller_hand" style="margin-top: 2em;">
             <thead title="Klikk for å skjule">
                 <tr>
                     <th style="width: 150px;">Spiller</th>
+                    <th style="width: 20px;">ID</th>
                     <th>Hånd</th>
                 </tr>
             </thead>
             <tbody>
-
             </tbody>
         </table>
     </div>
+
     <div class="handling_c">
-        <p>Vi antar mapping Nord, Sør, Øst, Vest. Nord begynner alltid som dealer, og følger klokka. <br>"todo: Tilfeldig tildeling følger senere"</p>
+        <h2>Budrunde</h2>
+        <div class="endpoint">POST /bridge/start/:spiller_id  {id: number, bid: string} </div>
+        <p>Vi antar mapping Nord, Sør, Øst, Vest. Nord begynner alltid som dealer, så øst er først ut. <br>"todo: Tilfeldig tildeling følger senere"</p>
+        <form id="p_action_bud" onsubmit="return false;">
+            <p id="p_action_bud_tag">&nbsp;</p>
+            <select id="bid_player">
+            </select>
+            <select id="bid_rank">
+                <option value="0">0</option>
+                <option value="1" selected>1</option>
+                <option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option>
+                <option value="6">6</option><option value="7">7</option>
+            </select>
+            <select id="bid_suit">
+                <option value="0" selected>NT</option>
+                <option value="1">♣️</option>
+                <option value="2">♦️</option>
+                <option value="3">❤️</option>
+                <option value="4">♠️</option>
+            </select>
+            <button onclick="gi_bud()">Gi bud</button>
+        </form>
     </div>
 
 </body>
