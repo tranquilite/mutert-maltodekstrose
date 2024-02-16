@@ -6,13 +6,20 @@
         body { font-family: Arial, sans-serif; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #4CAF50; color: white; }
-        .handling_c { border: 1px solid gray; border-radius: 10px; background-color: #EEEEEE ; padding: 1em; margin: 1em;}
+        th { background-color: var(--tbl_th_farge); color: white; }
+        .handling_c { border: 1px solid gray; border-radius: 10px; background-color: var(--handling_c_bg) ; padding: 1em; margin: 1em;}
+        .handling_c_b { margin: 5px; padding: 2px; border: 1px solid gray; border-radius: 8px; display: block; width: 60%; background-color: var(--handling_c_bg_d);}
         .endpoint { font-family: monospace; font-style: italic; font-size: 9pt; color: blue; margin-bottom: 1em;}
         .respons_c, .spiller-hand { font-family: monospace; font-size: 8pt; margin: 1em;}
         #spiller_input { display: flex; flex-direction: row; align-items: flex-start;}
         #spiller_input label {display: block; margin-right: 10px; font-size: 10pt;}
         #spiller_input input { margin-right: 10px; width: 10ch;}
+
+        :root {
+            --tbl_th_farge: #4CAF50;
+            --handling_c_bg: #EEEEEE;
+            --handling_c_bg_d: #D1D1D1;
+        }
     </style>
     <script type="text/javascript" src="r3_frontend.jsx"></script>
 </head>
@@ -67,6 +74,7 @@
             </select>
             <button onclick="gi_bud()">Gi bud</button>
         </form>
+        <div class="handling_c_b">Budrunde 1</div>
     </div>
 
 </body>

@@ -200,7 +200,7 @@ app.post("/bridge/loadgame",
 
 // Håndter rooooot
 app.get("/", async(req: Request, resp: Response) => {
-    try { resp.sendFile(path.join(__dirname, 'runde3.htm')); }
+    try { resp.sendFile(path.join(__dirname, 'main.htm')); }
     catch (inError) { Trainwreck(inError); }
 });
 
