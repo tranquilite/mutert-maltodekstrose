@@ -49,6 +49,10 @@ class Kort {
             verdi = ["J", "D", "K", "A"][["11", "12", "13", "14"].indexOf(this.verdi)];
         } else { verdi = this.verdi; }
         return `${this.farge} ${this.verdi}`; }  // __str__
+
+    __repr__() {
+        return [this.farge, this.verdi];
+    }
 }
 
 type Bud = {
@@ -75,6 +79,14 @@ class Spiller {
 
     // Los getters infernales
     get_hand() { return this.hand; }
+
+    bygg_spillerprofil () {  // ghetto __repr__
+        let _hand = [];
+        for (let kort in this.hand) {
+            _hand.push(this.hand[kort].__repr__());
+        }
+        return {"navn": this.navn, "id": this.hand, "retning": this.retning, "bud": this.bids, "hand": _hand};
+    }
 }
 
 // PSYKE! Dette funker jo
@@ -92,6 +104,15 @@ class Spilltilstand {
     set_game_state(spillere: Spiller[], poeng: {[key: string]: number}) {
         this.spillere = spillere;
         this.poeng = poeng;
+    }
+
+    __save_game_state(): {} | boolean {
+        if (this.spillere.length === 0) {
+            return false;
+        }
+        let _spillere = [];
+        for (let spiller in this.spillere) { _spillere.push( this.spillere[spiller].bygg_spillerprofil()) }
+        return {"spillere": _spillere};
     }
 
 }
@@ -152,6 +173,29 @@ app.get("/bridge/bid",
     (req: Request, resp: Response) => {
         // ...
 });
+
+app.get("/bridge/savegame",
+    (req: Request, resp: Response) => {
+    try {
+        const __state: {} = SPILL.__save_game_state();
+        if (__state === false ) {
+            resp.status(510);
+            resp.send( {"error": "no active game"} );
+        } else {
+            resp.setHeader('Content-disposition', 'attachment; filename=savegame.json');
+            resp.setHeader('Content-type', 'application/json');
+            resp.send(SPILL.__save_game_state());    
+        }
+        
+    } catch (inError) { Trainwreck(inError); }
+});
+
+app.post("/bridge/loadgame",
+    (req: Request, resp: Response) => {
+        try {
+            // loadgame logic
+        } catch (inError) { Trainwreck(inError); }
+    });
 
 
 // Håndter rooooot
