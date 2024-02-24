@@ -103,36 +103,6 @@ app.get("/bridge/bid",
         resp.send( SPILL.get_bud() );
 });
 
-app.get("/bridge/savegame",
-    (req: Request, resp: Response) => {
-    try
-    {
-        const __state: {} = SPILL.__save_game_state();
-        if (__state === false )
-        {
-            resp.status(510);
-            resp.send( {"error": "no active game"} );
-        }
-        else
-        {
-            resp.setHeader('Content-disposition', 'attachment; filename=savegame.json');
-            resp.setHeader('Content-type', 'application/json');
-            resp.send(SPILL.__save_game_state());    
-        }
-    }
-    catch (inError)
-    {
-        Trainwreck(inError);
-    }
-});
-
-app.post("/bridge/loadgame",
-    (req: Request, resp: Response) => {
-        try {
-            // loadgame logic
-        } catch (inError) { Trainwreck(inError); }
-});
-
 
 // Håndter rooooot
 app.get("/", async(req: Request, resp: Response) => {
