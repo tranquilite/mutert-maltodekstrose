@@ -85,6 +85,25 @@ class Spiller {
 
     // Los getters infernales
     get_hand() { return this.hand; }
+    get_bud(idx: number | string = "None"): Bud | Bud[] { 
+        if (typeof idx === "string")
+        {
+            return this.bids
+        }
+        else
+        {
+            return this.bids[ idx % (this.bids.length - 1) ];
+        }
+    }
+
+    get_alle_bud(): Bud[] {
+        return this.bids;
+    }
+
+    // Les setters
+    sett_bud(bud: Bud) {
+        this.bids.push(bud);
+    }
 
     bygg_spillerprofil () {  // ghetto __repr__
         let _hand = [];
@@ -102,9 +121,10 @@ class Spilltilstand {
     private spillere: Spiller[];
     private poeng: { [key: string]: number };
     private runde: number;
+    private budgiver: number;
 
     constructor() {
-        this.spillere = []; this.poeng = {};  // Dummy
+        this.spillere = []; this.poeng = {};  this.budgiver = 2; // Dummy
         this.runde = 1;  // Ny runde gir selvfølgelig omstart på 1. runde
     }
 
@@ -120,6 +140,24 @@ class Spilltilstand {
         let _spillere = [];
         for (let spiller in this.spillere) { _spillere.push( this.spillere[spiller].bygg_spillerprofil()) }
         return {"spillere": _spillere};
+    }
+
+    _gi_bud(spiller: number, bud: string) {
+        
+    }
+
+    // generelle getters
+    get_bud() {
+        let foo: {[key: number]: Bud[]} = {};
+        for (let i = 0; i < this.spillere.length; i++)
+        {
+            foo[i]= this.spillere[i].get_alle_bud();
+        }
+        return foo;
+    }
+
+    get_budgiver(): number {
+        return this.budgiver;
     }
 
 }
@@ -177,10 +215,19 @@ app.post("/bridge/start",
 
 app.post("/bridge/bid/:player_id",
     (req: Request, resp: Response) => {
-        try {
-
-            resp.send( {"1": "1NT"});
-        } catch (inError) {
+        try
+        {
+            if (parseInt(req.params.player_id) == SPILL.get_budgiver())
+            {
+            
+            }
+            else
+            {
+                resp.send( {"error": "Bid already given in round"} );
+            }
+        }
+        catch (inError)
+        {
             Trainwreck(inError);
         }
 });
@@ -219,7 +266,7 @@ app.post("/bridge/loadgame",
         try {
             // loadgame logic
         } catch (inError) { Trainwreck(inError); }
-    });
+});
 
 
 // Håndter rooooot
