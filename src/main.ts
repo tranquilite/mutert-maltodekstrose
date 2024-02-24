@@ -36,7 +36,8 @@ class Kort {
     private verdi: string;  // Etterligne py er .. stress
 
     constructor(farge: string, verdi: string) {
-        if (["J", "D", "K", "A"].includes(verdi)) {
+        if (["J", "D", "K", "A"].includes(verdi))
+        {
             verdi = ["11", "12", "13", "14"][["J", "D", "K", "A"].indexOf(verdi)];
         }
         this.farge = farge;
@@ -45,9 +46,14 @@ class Kort {
 
     toString() {
         let verdi: string = "";
-        if (["11", "12", "13", "14"].includes(this.verdi)) {
+        if (["11", "12", "13", "14"].includes(this.verdi))
+        {
             verdi = ["J", "D", "K", "A"][["11", "12", "13", "14"].indexOf(this.verdi)];
-        } else { verdi = this.verdi; }
+        }
+        else
+        {
+            verdi = this.verdi;
+        }
         return `${this.farge} ${this.verdi}`; }  // __str__
 
     __repr__() {
@@ -82,7 +88,8 @@ class Spiller {
 
     bygg_spillerprofil () {  // ghetto __repr__
         let _hand = [];
-        for (let kort in this.hand) {
+        for (let kort in this.hand)
+        {
             _hand.push(this.hand[kort].__repr__());
         }
         return {"navn": this.navn, "id": this.hand, "retning": this.retning, "bud": this.bids, "hand": _hand};
@@ -123,12 +130,17 @@ function generer_kortstokk() {
     let valor: string[] = ["2", "3", "4", "5", "6", "7", "8", "9",
                            "10", "J","D", "K", "A"]
 
-    for (let farge of farger) {  // Hvis lat, overkompliser.
-        for (let verdi of valor) { kortstokk.push(new Kort(farge, verdi)); }
+    for (let farge of farger) 
+    {  // Hvis lat, overkompliser.
+        for (let verdi of valor) 
+        {
+            kortstokk.push(new Kort(farge, verdi));
+        }
     }
 
     // Stokk om. ..tror jeg. tbh husker jeg dette knapt
-    for (let i = kortstokk.length - 1; i > 0; i--) {
+    for (let i = kortstokk.length - 1; i > 0; i--)
+    {
         const base: number = Math.floor(Math.random() * (i + 1));
         [kortstokk[i], kortstokk[base]] = [kortstokk[base], kortstokk[i]];
     }
@@ -144,9 +156,11 @@ app.post("/bridge/start",
         let spillere: Spiller[] = [];
         const kortstokk = generer_kortstokk();
 
-        try {
+        try
+        {
             const spillforesporsel = req.body["spillere"];
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 4; i++)
+            {
                 const hand = kortstokk.slice( (13*i), (13*(i+1)) );
                 spillere.push(new Spiller(spillforesporsel[i],
                                           i*4, // "TODO: ag skikkelige id-er"
@@ -154,7 +168,9 @@ app.post("/bridge/start",
             }
             SPILL.set_game_state(spillere, {});
             resp.send(spillere);
-        } catch (inError) {
+        }
+        catch (inError)
+        {
             Trainwreck(inError);
         }
 });
@@ -171,23 +187,31 @@ app.post("/bridge/bid/:player_id",
 
 app.get("/bridge/bid",
     (req: Request, resp: Response) => {
-        // ...
+        
+        resp.send( SPILL.get_bud() );
 });
 
 app.get("/bridge/savegame",
     (req: Request, resp: Response) => {
-    try {
+    try
+    {
         const __state: {} = SPILL.__save_game_state();
-        if (__state === false ) {
+        if (__state === false )
+        {
             resp.status(510);
             resp.send( {"error": "no active game"} );
-        } else {
+        }
+        else
+        {
             resp.setHeader('Content-disposition', 'attachment; filename=savegame.json');
             resp.setHeader('Content-type', 'application/json');
             resp.send(SPILL.__save_game_state());    
         }
-        
-    } catch (inError) { Trainwreck(inError); }
+    }
+    catch (inError)
+    {
+        Trainwreck(inError);
+    }
 });
 
 app.post("/bridge/loadgame",
@@ -200,8 +224,14 @@ app.post("/bridge/loadgame",
 
 // Håndter rooooot
 app.get("/", async(req: Request, resp: Response) => {
-    try { resp.sendFile(path.join(__dirname, 'frontend.htm')); }
-    catch (inError) { Trainwreck(inError); }
+    try
+    {
+        resp.sendFile(path.join(__dirname, 'frontend.htm'));
+    }
+    catch (inError)
+    {
+        Trainwreck(inError);
+    }
 });
 
 // Fyr løs
