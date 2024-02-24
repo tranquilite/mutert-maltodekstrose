@@ -15,7 +15,7 @@ app.use(function(inRequest: Request, inResponse: Response, inNext: NextFunction)
 });
 
 // Bygger ut litt feilhåndtering
-function Trainwreck(err: any, tree: string='NA') { console.log(err); }  // fml
+function Trainwreck(err: any, tree: string='NA') { console.log(err); }
 
 
 /* =========================================================================
@@ -84,11 +84,15 @@ app.post("/bridge/bid/:player_id",
         {
             if (parseInt(req.params.player_id) == SPILL.get_budgiver())
             {
-            
+                let _bud: Bud = {
+                    rank: parseInt(req.body["bid_rank"]),
+                    bud: parseInt(req.body["bid_suit"])
+                }
+                SPILL._gi_bud(_bud);
             }
             else
             {
-                resp.send( {"error": "Bid already given in round"} );
+                resp.send( {"error": "Wrong turn"} );
             }
         }
         catch (inError)
