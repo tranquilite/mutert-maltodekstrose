@@ -26,10 +26,12 @@ function populer_spiller_bid(spillebord) {
     const player_turn = document.getElementById("p_action_bud_tag").textContent = "Spiller Øst";
     const player_turn_field1 = document.getElementById("bid_player");
     for (spiller in spillebord) {
-        spiller = spillebord[spiller]; // fortsatt en stygg hack
         const sp_formoption = document.createElement("option");
-        sp_formoption.value = spiller.id;
-        sp_formoption.textContent = spiller.navn;
+        sp_formoption.value = spillebord[spiller].id;
+        sp_formoption.textContent = spillebord[spiller].navn;
+        if (spiller == 2) {
+            sp_formoption.setAttribute("selected", "selected");
+        }
         player_turn_field1.appendChild(sp_formoption);
 
     }
@@ -65,13 +67,27 @@ function gi_bud() {
     let player_turn = document.getElementById("p_action_bud_tag").textContent = "";
     let bid_post = {"rank": bid_rank, "suit": bid_suit};
 
-    fetch("/bridge/bid", {
+    fetch(`/bridge/bid/${document.getElementById("bid_player").selectedIndex}`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(bid_post) } )
         .then(response => { return response.json(); })
         .then(data => {
-            if ( data == {"error": "Bid already given in round"} ) { console.log(data); }})
+            if ( data == {"error": "Wrong turn"} ) {
+                console.log(data); 
+            } else {
+                // Handle shit.
+            }
+        })
+
+        var select = document.getElementById("bid_player");
+        var selectedOption = select.querySelector("option[selected]");
+        var nextOption = selectedOption.nextElementSibling;
+        
+        if (nextOption) {
+            selectedOption.removeAttribute("selected");
+            nextOption.setAttribute("selected", "selected");
+        }
 }
 
 // Oppstartsgreier.. Mer smerte :3
