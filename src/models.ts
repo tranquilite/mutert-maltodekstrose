@@ -1,6 +1,6 @@
 export enum himmelretning { North, South, East, West }  // forenkling. Fordel: lag1, oddetall. lag2, partall.
 export enum k_farge { Clubs, Diamonds, Hearts, Spades }  // Spades topp, Kløver bunnpoeng.
-export enum bud_typer { NT, Clubs, Diamonds, Hearts, Spades, Pass, Double, Redouble }
+export enum bud_typer { Clubs, Diamonds, Hearts, Spades, NT } // Pass, Double, Redouble }
 
 export type Bud = {
     rank: number;
@@ -10,6 +10,7 @@ export type Bud = {
 export class Kort {
     private farge: string;  // __slots__
     private verdi: string;  // Etterligne py er .. stress
+    private __rank: number;
 
     constructor(farge: string, verdi: string) {
         if (["J", "D", "K", "A"].includes(verdi))
@@ -18,6 +19,13 @@ export class Kort {
         }
         this.farge = farge;
         this.verdi = verdi;
+        this.__rank = this._ranking_poeng();
+    }
+
+    _ranking_poeng(): number {
+        const ranks: { [key: string]: number } = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12};
+        const suits: { [key: string]: number } = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3};
+        return ranks[this.farge] + 13 * suits[this.verdi];
     }
 
     toString() {
@@ -37,98 +45,91 @@ export class Kort {
     }
 }
 
+
 export class Spiller {
     public navn: string;
-    public id: number;
     public retning: himmelretning; 
     private hand: Kort[];
-    protected bids: Bud[];  // arr av Bud; Bud er 2 Clubs *eller* 1 Double; Siste er praktisk ugyldig, men gyldig i datamodellen.
 
-    constructor(navn: string, id: number, hand: Kort[], himmelretning: himmelretning) {
+    constructor(navn: string, himmelretning: himmelretning) {
         this.navn = navn;
-        this.id = id;
-        this.hand = hand;
         this.retning = himmelretning;
-        this.bids = [];
+        this.hand = [];
     }
 
-    toString() { return `${this.navn} ( ${this.retning})`; }
+    __repr__() {
+        return [this.navn, this.retning];
+    }
 
     // Los getters infernales
-    get_hand() { return this.hand; }
-    get_bud(idx: number | string = "None"): Bud | Bud[] { 
-        if (typeof idx === "string")
-        {
-            return this.bids
-        }
-        else
-        {
-            return this.bids[ idx % (this.bids.length - 1) ];
-        }
+    get_hand() {
+        return this.hand;
     }
 
-    get_alle_bud(): Bud[] {
-        return this.bids;
+
+    sett_hand(hand: Kort[]): void {
+        this.hand = hand;
     }
 
-    // Les setters
-    sett_bud(bud: Bud) {
-        this.bids.push(bud);
-    }
-
-    bygg_spillerprofil () {  // ghetto __repr__
-        let _hand = [];
-        for (let kort in this.hand)
-        {
-            _hand.push(this.hand[kort].__repr__());
-        }
-        return {"navn": this.navn, "id": this.hand, "retning": this.retning, "bud": this.bids, "hand": _hand};
-    }
 }
 
-// PSYKE! Dette funker jo
 export class Spilltilstand {
     private spillere: Spiller[];
-    private poeng: { [key: string]: number };
-    private runde: number;
-    private budgiver: number;  // INDEKS AV BUDGIVER; IKKE SPILLER-ID
+    private kortstokk: Kort[];
+    private status: boolean;
 
     constructor() {
-        this.spillere = []; this.poeng = {};  this.budgiver = 2; // Dummy
-        this.runde = 1;  // Ny runde gir selvfølgelig omstart på 1. runde
+        this.spillere = []
+        this.kortstokk = this.generer_kortstokk();
+        this.status = false;
     }
 
-    set_game_state(spillere: Spiller[], poeng: {[key: string]: number}) {
-        this.spillere = spillere;
-        this.poeng = poeng;
-    }
-
-    __save_game_state(): {} | boolean {
-        if (this.spillere.length === 0) {
-            return false;
+    generer_kortstokk(): Kort[] {
+        let kortstokk: Kort[] = [];
+        let farger: string[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
+        let valor: string[] = ["2", "3", "4", "5", "6", "7", "8", "9",
+                               "10", "J","D", "K", "A"]
+    
+        for (let idx_farge of farger) 
+        {  // Hvis lat, overkompliser.
+            for (let idx_verdi of valor) 
+            {
+                kortstokk.push(new Kort(idx_farge, idx_verdi));
+            }
         }
-        let _spillere = [];
-        for (let spiller in this.spillere) { _spillere.push( this.spillere[spiller].bygg_spillerprofil()) }
-        return {"spillere": _spillere};
-    }
-
-    _gi_bud(bud: Bud) {
-        this.spillere[this.budgiver].sett_bud(bud);
-        this.budgiver = (this.budgiver + 1 ) % (this.spillere.length - 1);
-    }
-
-    // generelle getters
-    get_bud() {
-        let foo: {[key: number]: Bud[]} = {};
-        for (let i = 0; i < this.spillere.length; i++)
+    
+        // Stokk om. ..tror jeg. tbh husker jeg dette knapt
+        for (let i = kortstokk.length - 1; i > 0; i--)
         {
-            foo[i]= this.spillere[i].get_alle_bud();
+            const base: number = Math.floor(Math.random() * (i + 1));
+            [kortstokk[i], kortstokk[base]] = [kortstokk[base], kortstokk[i]];
         }
-        return foo;
+    
+        return kortstokk;
     }
 
-    get_budgiver(): number {
-        return this.budgiver;
+    dealer_deal(): void {  // Fordel kort
+        for (let idx_spiller = 0; idx_spiller < this.spillere.length; idx_spiller++)
+        {
+            const stack = this.kortstokk.slice( ( 13* idx_spiller ), (13*idx_spiller + 1) );
+            this.spillere[idx_spiller].sett_hand(stack);
+        }
     }
 
+    system_klar(): object {  // kontroll
+        let reason: {[key: string]: string} = {}
+
+        if (this.status === false) 
+        {
+            reason["status"]= "Ingen aktive spill"
+            return reason;
+        }
+
+        if (this.spillere.length < 4)
+        {
+            reason["spillere"] = `Mangler ${4 - this.spillere.length} spillere`;
+        }
+
+        return reason;
+    }
 }
