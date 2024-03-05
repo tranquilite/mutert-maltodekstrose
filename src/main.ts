@@ -30,7 +30,7 @@ function Trainwreck(err: any, tree: string='NA') { console.log(err); }
 function generer_kortstokk()
 {
     let kortstokk: Kort[] = [];
-    let farger: string[] = ["Spar", "Hjerter", "Ruter", "Kløver"];
+    let farger: string[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
     let valor: string[] = ["2", "3", "4", "5", "6", "7", "8", "9",
                            "10", "J","D", "K", "A"]
 
@@ -51,7 +51,7 @@ function generer_kortstokk()
 
 
 // Start et spill.
-// Ta et array med fire navn og returner et array Spiller-objekt
+// Ta et array med fire navn og posisjoner, og returner et array Spiller-objekt
 app.post("/bridge/start",
     (req: Request, resp: Response) => {
         let spillere: Spiller[] = [];
@@ -111,5 +111,5 @@ app.get("/", async(req: Request, resp: Response) => {
 });
 
 // Fyr løs
-var SPILL = new Spilltilstand();  // NEI! Slem! Global var er ondskap
+const SPILL = new Spilltilstand();  // NEI! Slem! Global var er ondskap
 app.listen(80, () => console.log("Kjører..") );

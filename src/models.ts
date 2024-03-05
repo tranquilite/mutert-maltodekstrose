@@ -13,9 +13,10 @@ export class Kort {
 
     constructor(farge: string, verdi: string)
     {
+        /*if (["J", "D", "K", "A"].includes(verdi))
         {
             verdi = ["11", "12", "13", "14"][["J", "D", "K", "A"].indexOf(verdi)];
-        }
+        }*/
         this.farge = farge;
         this.verdi = verdi;
     toString()
@@ -88,7 +89,6 @@ export class Spiller {
     }
 }
 
-// PSYKE! Dette funker jo
 export class Spilltilstand {
     private spillere: Spiller[];
     private poeng: { [key: string]: number };
@@ -98,22 +98,13 @@ export class Spilltilstand {
     constructor()
     {
         this.spillere = []; this.poeng = {};  this.budgiver = 2; // Dummy
-        this.runde = 1;  // Ny runde gir selvfølgelig omstart på 1. runde
     }
 
     set_game_state(spillere: Spiller[], poeng: {[key: string]: number})
     {
         this.spillere = spillere;
         this.poeng = poeng;
-    }
-
-    __save_game_state(): {} | boolean {
-        if (this.spillere.length === 0) {
-            return false;
-        }
-        let _spillere = [];
-        for (let spiller in this.spillere) { _spillere.push( this.spillere[spiller].bygg_spillerprofil()) }
-        return {"spillere": _spillere};
+        console.log(this.spillere, this.poeng);
     }
 
     _gi_bud(bud: Bud)
@@ -133,6 +124,7 @@ export class Spilltilstand {
     }
 
     get_budgiver(): number
+    {
         return this.budgiver;
     }
 
