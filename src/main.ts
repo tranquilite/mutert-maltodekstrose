@@ -18,12 +18,17 @@ app.use(function(inRequest: Request, inResponse: Response, inNext: NextFunction)
     Prosedyrehjelpere
    ========================================================================= */
 // Bygger ut litt feilhåndtering
-function Trainwreck(err: any, tree: string='NA') { console.log(err); }
+function Trainwreck(err: any, resp_obj: Response, tree: string='NA')
+{
+    // Viser seg at feilhåndtering er _litt_ komplekst i stackmaskiner.
+    resp_obj.send(err);
+    console.error(err);
+}   
 
 function generer_kortstokk()
 {
     let kortstokk: Kort[] = [];
-    let farger: string[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
+    /*let farger: string[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
     let valor: string[] = ["2", "3", "4", "5", "6", "7", "8", "9",
                            "10", "J","D", "K", "A"]
 
@@ -31,6 +36,10 @@ function generer_kortstokk()
         for (let verdi of valor) {
             kortstokk.push(new Kort(farge, verdi));
         }
+    }*/
+
+    for (let num = 0; num <= 51; num++) {
+        kortstokk.push(new Kort(num))
     }
 
     // Stokk om. ..tror jeg. tbh husker jeg dette knapt
@@ -69,8 +78,12 @@ async function endpoint_bridge_start(req: Request, resp: Response)
         const _map_retning: { [key: string] : number } =  {"nord": 0, "sor": 1, "ost": 2, "vest": 3};
 
         try {
+            if (!("spillere" in req.body)) {
+                throw new Error(JSON.stringify({"cause": "Scope missing", "meta": req.body}));
+            }
             const spillforesporsel = req.body["spillere"];
             const _retning: string[] = Object.keys(spillforesporsel);
+            // for (let i = 0; i < Object.keys(spillforesporsel); i++) {
             for (let i = 0; i < 4; i++) {
                 const hand = kortstokk.slice( (13*i), (13*(i+1)) );
                 console.log(spillforesporsel);
@@ -84,7 +97,7 @@ async function endpoint_bridge_start(req: Request, resp: Response)
             resp.send(spillere);
         }
         catch (inError) {
-            Trainwreck(inError);
+            Trainwreck(inError, resp);
         }
 }
 
@@ -104,7 +117,7 @@ async function endpoint_bridge_bid_pid(req: Request, resp: Response)
             }
         }
         catch (inError) {
-            Trainwreck(inError);
+            Trainwreck(inError, resp);
         }
 }
 
@@ -123,7 +136,7 @@ async function endpoint_root(req: Request, resp: Response)
         resp.sendFile(path.join(__dirname, 'frontend.htm'));
     }
     catch (inError) {
-        Trainwreck(inError);
+        Trainwreck(inError, resp);
     }
 }
 

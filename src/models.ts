@@ -8,42 +8,47 @@ export type Bud = {
 }
 
 export class Kort {
-    public readonly farge: string;  // __slots__
-    public readonly verdi: string;  // Etterligne py er .. stress
     private __ranking: number;
 
-    constructor(farge: string, verdi: string)
+    constructor(idx: number)
     {
-        /*if (["J", "D", "K", "A"].includes(verdi))
-        {
-            verdi = ["11", "12", "13", "14"][["J", "D", "K", "A"].indexOf(verdi)];
-        }*/
-        this.farge = farge;
-        this.verdi = verdi;
-        this.__ranking = this._ranking_poeng();
+        this.__ranking = idx;
     }
 
-    _ranking_poeng(): number  // Wonka's secret magic recipe
+    toJSON()
     {
-        const verdier: { [key: string]: number } = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12};
-        const farger: { [key: string]: number } = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3};
-        return verdier[this.verdi] + 13 * farger[this.farge];
+        return {
+            "farge": this.kalkyle_farge(),
+            "verdi": this.kalkyle_verdi(),
+            "__ranking": this.__ranking
+        };
     }
 
-    toString()
+    kalkyle_farge(): string
     {
+        const f_map: { [key: number]: string } = {0: "Clubs", 1: "Diamonds", 2: "Hearts", 3: "Spades"};
+        const idx_farge: number = (Math.floor(this.__ranking / 13));
+        return f_map[idx_farge];
+    }
+
+    kalkyle_verdi(): string
+    {
+        const key_verdi: string = (this.__ranking % 13 + 2).toString();
         let verdi: string = "";
-        if (["11", "12", "13", "14"].includes(this.verdi)) {
-            verdi = ["J", "D", "K", "A"][["11", "12", "13", "14"].indexOf(this.verdi)];
+        if (["11", "12", "13", "14"].includes(key_verdi)) {
+            verdi = ["J", "Q", "K", "A"][["11", "12", "13", "14"].indexOf(key_verdi)];
         }
         else {
-            verdi = this.verdi;
+            verdi = key_verdi;
         }
-        return `${this.farge} ${this.verdi}`; }  // __str__
+        return verdi
+    }
 
     __repr__()
     {
-        return [this.farge, this.verdi];
+        const verdi: number = this.__ranking % 13;
+        const farge:number = Math.floor(this.__ranking / 13) + 2;
+        return [this.kalkyle_farge(), this.kalkyle_verdi()];
     }
 }
 
@@ -52,7 +57,7 @@ export class Spiller {
     public id: number;
     public retning: himmelretning; 
     private hand: Kort[];
-    protected bids: Bud[];  // arr av Bud; Bud er 2 Clubs *eller* 1 Double; Siste er praktisk ugyldig, men gyldig i datamodellen.
+    protected bids: Bud[];
 
     constructor(navn: string, id: number, hand: Kort[], himmelretning: himmelretning)
     {
@@ -103,7 +108,6 @@ export class Spiller {
 export class Spilltilstand {
     private spillere: Spiller[];
     private poeng: { [key: string]: number };
-    private runde: number;
     private budgiver: number;  // INDEKS AV BUDGIVER; IKKE SPILLER-ID
 
     constructor()
@@ -111,8 +115,19 @@ export class Spilltilstand {
         this.spillere = []; this.poeng = {};  this.budgiver = 2; // Dummy
     }
 
+    metavalidering()
+    {
+        if (!(this.spillere.length === 4)) {
+            let _reason = `${4 - this.spillere.length} spillere mangler`;
+            throw new Error(JSON.stringify({"cause": _reason}));
+        }
+    }
+
     set_game_state(spillere: Spiller[], poeng: {[key: string]: number})
     {
+        if (spillere.length > 4) {
+            throw new Error(JSON.stringify({"cause": "For mange spillere"}));
+        }
         this.spillere = spillere;
         this.poeng = poeng;
         console.log(this.spillere, this.poeng);
@@ -120,6 +135,7 @@ export class Spilltilstand {
 
     _gi_bud(bud: Bud)
     {
+        this.metavalidering();
         this.spillere[this.budgiver].sett_bud(bud);
         this.budgiver = (this.budgiver + 1 ) % (this.spillere.length - 1);
     }
@@ -127,6 +143,7 @@ export class Spilltilstand {
     // generelle getters
     get_bud()
     {
+        this.metavalidering();
         let foo: {[key: number]: Bud[]} = {};
         for (let i = 0; i < this.spillere.length; i++) {
             foo[i]= this.spillere[i].get_alle_bud();
