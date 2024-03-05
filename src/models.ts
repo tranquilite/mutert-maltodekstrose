@@ -11,28 +11,26 @@ export class Kort {
     private farge: string;  // __slots__
     private verdi: string;  // Etterligne py er .. stress
 
-    constructor(farge: string, verdi: string) {
-        if (["J", "D", "K", "A"].includes(verdi))
+    constructor(farge: string, verdi: string)
+    {
         {
             verdi = ["11", "12", "13", "14"][["J", "D", "K", "A"].indexOf(verdi)];
         }
         this.farge = farge;
         this.verdi = verdi;
-    }
-
-    toString() {
+    toString()
+    {
         let verdi: string = "";
-        if (["11", "12", "13", "14"].includes(this.verdi))
-        {
+        if (["11", "12", "13", "14"].includes(this.verdi)) {
             verdi = ["J", "D", "K", "A"][["11", "12", "13", "14"].indexOf(this.verdi)];
         }
-        else
-        {
+        else {
             verdi = this.verdi;
         }
         return `${this.farge} ${this.verdi}`; }  // __str__
 
-    __repr__() {
+    __repr__()
+    {
         return [this.farge, this.verdi];
     }
 }
@@ -44,7 +42,8 @@ export class Spiller {
     private hand: Kort[];
     protected bids: Bud[];  // arr av Bud; Bud er 2 Clubs *eller* 1 Double; Siste er praktisk ugyldig, men gyldig i datamodellen.
 
-    constructor(navn: string, id: number, hand: Kort[], himmelretning: himmelretning) {
+    constructor(navn: string, id: number, hand: Kort[], himmelretning: himmelretning)
+    {
         this.navn = navn;
         this.id = id;
         this.hand = hand;
@@ -52,34 +51,37 @@ export class Spiller {
         this.bids = [];
     }
 
-    toString() { return `${this.navn} ( ${this.retning})`; }
+    toString()
+    {
+        return `${this.navn} ( ${this.retning})`;
+    }
 
     // Los getters infernales
     get_hand() { return this.hand; }
     get_bud(idx: number | string = "None"): Bud | Bud[] { 
-        if (typeof idx === "string")
-        {
+        if (typeof idx === "string") {
             return this.bids
         }
-        else
-        {
+        else {
             return this.bids[ idx % (this.bids.length - 1) ];
         }
     }
 
-    get_alle_bud(): Bud[] {
+    get_alle_bud(): Bud[]
+    {
         return this.bids;
     }
 
     // Les setters
-    sett_bud(bud: Bud) {
+    sett_bud(bud: Bud)
+    {
         this.bids.push(bud);
     }
 
-    bygg_spillerprofil () {  // ghetto __repr__
+    bygg_spillerprofil()  // ghetto __repr__
+    {
         let _hand = [];
-        for (let kort in this.hand)
-        {
+        for (let kort in this.hand) {
             _hand.push(this.hand[kort].__repr__());
         }
         return {"navn": this.navn, "id": this.hand, "retning": this.retning, "bud": this.bids, "hand": _hand};
@@ -93,12 +95,14 @@ export class Spilltilstand {
     private runde: number;
     private budgiver: number;  // INDEKS AV BUDGIVER; IKKE SPILLER-ID
 
-    constructor() {
+    constructor()
+    {
         this.spillere = []; this.poeng = {};  this.budgiver = 2; // Dummy
         this.runde = 1;  // Ny runde gir selvfølgelig omstart på 1. runde
     }
 
-    set_game_state(spillere: Spiller[], poeng: {[key: string]: number}) {
+    set_game_state(spillere: Spiller[], poeng: {[key: string]: number})
+    {
         this.spillere = spillere;
         this.poeng = poeng;
     }
@@ -112,22 +116,23 @@ export class Spilltilstand {
         return {"spillere": _spillere};
     }
 
-    _gi_bud(bud: Bud) {
+    _gi_bud(bud: Bud)
+    {
         this.spillere[this.budgiver].sett_bud(bud);
         this.budgiver = (this.budgiver + 1 ) % (this.spillere.length - 1);
     }
 
     // generelle getters
-    get_bud() {
+    get_bud()
+    {
         let foo: {[key: number]: Bud[]} = {};
-        for (let i = 0; i < this.spillere.length; i++)
-        {
+        for (let i = 0; i < this.spillere.length; i++) {
             foo[i]= this.spillere[i].get_alle_bud();
         }
         return foo;
     }
 
-    get_budgiver(): number {
+    get_budgiver(): number
         return this.budgiver;
     }
 

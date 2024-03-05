@@ -27,23 +27,21 @@ function Trainwreck(err: any, tree: string='NA') { console.log(err); }
     Forsøk å få til at den kan dele kort, telle poeng og la spillerne
     melde én melding og få ett svar (fra sin "makker")
    ========================================================================= */ 
-function generer_kortstokk() {
+function generer_kortstokk()
+{
     let kortstokk: Kort[] = [];
     let farger: string[] = ["Spar", "Hjerter", "Ruter", "Kløver"];
     let valor: string[] = ["2", "3", "4", "5", "6", "7", "8", "9",
                            "10", "J","D", "K", "A"]
 
-    for (let farge of farger) 
-    {  // Hvis lat, overkompliser.
-        for (let verdi of valor) 
-        {
+    for (let farge of farger) {  // Hvis lat, overkompliser.
+        for (let verdi of valor) {
             kortstokk.push(new Kort(farge, verdi));
         }
     }
 
     // Stokk om. ..tror jeg. tbh husker jeg dette knapt
-    for (let i = kortstokk.length - 1; i > 0; i--)
-    {
+    for (let i = kortstokk.length - 1; i > 0; i--) {
         const base: number = Math.floor(Math.random() * (i + 1));
         [kortstokk[i], kortstokk[base]] = [kortstokk[base], kortstokk[i]];
     }
@@ -59,11 +57,10 @@ app.post("/bridge/start",
         let spillere: Spiller[] = [];
         const kortstokk = generer_kortstokk();
 
-        try
-        {
+        try {
             const spillforesporsel = req.body["spillere"];
             for (let i = 0; i < 4; i++)
-            {
+            for (let i = 0; i < 4; i++) {
                 const hand = kortstokk.slice( (13*i), (13*(i+1)) );
                 spillere.push(new Spiller(spillforesporsel[i],
                                           i*4, // "TODO: ag skikkelige id-er"
@@ -72,31 +69,26 @@ app.post("/bridge/start",
             SPILL.set_game_state(spillere, {});
             resp.send(spillere);
         }
-        catch (inError)
-        {
+        catch (inError) {
             Trainwreck(inError);
         }
 });
 
 app.post("/bridge/bid/:player_id",
     (req: Request, resp: Response) => {
-        try
-        {
-            if (parseInt(req.params.player_id) == SPILL.get_budgiver())
-            {
+        try {
+            if (parseInt(req.params.player_id) == SPILL.get_budgiver()) {
                 let _bud: Bud = {
                     rank: parseInt(req.body["bid_rank"]),
                     bud: parseInt(req.body["bid_suit"])
                 }
                 SPILL._gi_bud(_bud);
             }
-            else
-            {
+            else {
                 resp.send( {"error": "Wrong turn"} );
             }
         }
-        catch (inError)
-        {
+        catch (inError) {
             Trainwreck(inError);
         }
 });
@@ -110,12 +102,10 @@ app.get("/bridge/bid",
 
 // Håndter rooooot
 app.get("/", async(req: Request, resp: Response) => {
-    try
-    {
+    try {
         resp.sendFile(path.join(__dirname, 'frontend.htm'));
     }
-    catch (inError)
-    {
+    catch (inError) {
         Trainwreck(inError);
     }
 });
