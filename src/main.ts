@@ -14,19 +14,12 @@ app.use(function(inRequest: Request, inResponse: Response, inNext: NextFunction)
     inNext();
 });
 
+/* =========================================================================
+    Prosedyrehjelpere
+   ========================================================================= */
 // Bygger ut litt feilhåndtering
 function Trainwreck(err: any, tree: string='NA') { console.log(err); }
 
-
-/* =========================================================================
-    Men jeg må få en oblig som er server-basert, som holder rede på 4 spillere,
-    gir dem 13 kort hver og lar dem telle opp poengene.
-    Om de teller dem riktig eller feil spiller ingen rolle -
-    det er ikke det essensielle her.
-
-    Forsøk å få til at den kan dele kort, telle poeng og la spillerne
-    melde én melding og få ett svar (fra sin "makker")
-   ========================================================================= */ 
 function generer_kortstokk()
 {
     let kortstokk: Kort[] = [];
@@ -49,11 +42,28 @@ function generer_kortstokk()
     return kortstokk;
 }
 
+/* =========================================================================
+    Men jeg må få en oblig som er server-basert, som holder rede på 4 spillere,
+    gir dem 13 kort hver og lar dem telle opp poengene.
+    Om de teller dem riktig eller feil spiller ingen rolle -
+    det er ikke det essensielle her.
 
-// Start et spill.
+    Forsøk å få til at den kan dele kort, telle poeng og la spillerne
+    melde én melding og få ett svar (fra sin "makker")
+   ========================================================================= */
+
+
+// registrer endpoints
+app.get("/", endpoint_root);  // Rudimentært frontend
+app.post("/bridge/start", endpoint_bridge_start);  // Initialiseringspunkt
+app.get("/bridge/bid", endpoint_bridge_bid);  // Oversikt bud
+app.post("/bridge/bid/:player_id", endpoint_bridge_bid_pid);  // Gi bud
+
+
+// Initialiseringshandler
 // Ta et array med fire navn og posisjoner, og returner et array Spiller-objekt
-app.post("/bridge/start",
-    (req: Request, resp: Response) => {
+async function endpoint_bridge_start(req: Request, resp: Response) 
+{
         let spillere: Spiller[] = [];
         const kortstokk = generer_kortstokk();
         const _map_retning: { [key: string] : number } =  {"nord": 0, "sor": 1, "ost": 2, "vest": 3};
@@ -76,10 +86,11 @@ app.post("/bridge/start",
         catch (inError) {
             Trainwreck(inError);
         }
-});
+}
 
-app.post("/bridge/bid/:player_id",
-    (req: Request, resp: Response) => {
+
+async function endpoint_bridge_bid_pid(req: Request, resp: Response)
+{
         try {
             if (parseInt(req.params.player_id) == SPILL.get_budgiver()) {
                 let _bud: Bud = {
@@ -95,24 +106,27 @@ app.post("/bridge/bid/:player_id",
         catch (inError) {
             Trainwreck(inError);
         }
-});
-
-app.get("/bridge/bid",
-    (req: Request, resp: Response) => {
-        
-        resp.send( SPILL.get_bud() );
-});
+}
 
 
-// Håndter rooooot
-app.get("/", async(req: Request, resp: Response) => {
+
+async function endpoint_bridge_bid(req: Request, resp: Response)
+{
+    resp.send( SPILL.get_bud() );
+}
+
+
+// Rothåndtering
+async function endpoint_root(req: Request, resp: Response)
+{
     try {
         resp.sendFile(path.join(__dirname, 'frontend.htm'));
     }
     catch (inError) {
         Trainwreck(inError);
     }
-});
+}
+
 
 // Fyr løs
 const SPILL = new Spilltilstand();  // NEI! Slem! Global var er ondskap
