@@ -1,6 +1,6 @@
 export enum himmelretning { North, South, East, West }  // forenkling. Fordel: lag1, oddetall. lag2, partall.
 export enum k_farge { Clubs, Diamonds, Hearts, Spades }  // Spades topp, Kløver bunnpoeng.
-export enum bud_typer { NT, Clubs, Diamonds, Hearts, Spades, Pass, Double, Redouble }
+export enum bud_typer {Clubs, Diamonds, Hearts, Spades, NT, Pass, Double, Redouble }
 
 export type Bud = {
     rank: number;
@@ -46,9 +46,7 @@ export class Kort {
 
     __repr__()
     {
-        const verdi: number = this.__ranking % 13;
-        const farge:number = Math.floor(this.__ranking / 13) + 2;
-        return [this.kalkyle_farge(), this.kalkyle_verdi()];
+        return [this.__ranking, this.kalkyle_farge(), this.kalkyle_verdi()];
     }
 }
 
@@ -133,11 +131,16 @@ export class Spilltilstand {
         console.log(this.spillere, this.poeng);
     }
 
-    _gi_bud(bud: Bud)
+    _gi_bud(bud: Bud, idx_p: number): boolean
     {
         this.metavalidering();
-        this.spillere[this.budgiver].sett_bud(bud);
-        this.budgiver = (this.budgiver + 1 ) % (this.spillere.length - 1);
+        if (this.budgiver === idx_p) {
+            this.spillere[idx_p].sett_bud(bud);  // registrer
+            this.budgiver = (this.budgiver + 1 ) % (this.spillere.length - 1);  // Åpne for neste
+            return true;  // Kontrollflyt: Registrering passerte
+        }
+        return false;
+        
     }
 
     // generelle getters
@@ -151,9 +154,16 @@ export class Spilltilstand {
         return foo;
     }
 
-    get_budgiver(): number
+    get_budgiver(pid: number): number
     {
-        return this.budgiver;
+        // traverser spillere[] og finn rett spiller.
+        // Dette blir nødvendig fordi datamodellen er helt unødvendig flerdimma nå.
+        for (let i=0; i < 4; i++) {
+            if (this.spillere[i].id == pid) {
+                return i;  // returner idx for pid
+            }
+        }
+        return NaN;  // Hey, NaN er et nummer i javascript. Go figure.
     }
 
 }

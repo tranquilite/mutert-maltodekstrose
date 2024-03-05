@@ -16,3 +16,11 @@ content-type: application/json
 
 ###
 GET http://localhost/bridge/bid HTTP/1.1
+
+
+###
+PUT http://localhost/bridge/bid/12 HTTP/1.1
+{
+    "rank":"1",
+    "suit":"1"
+}

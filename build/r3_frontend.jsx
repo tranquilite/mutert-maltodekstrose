@@ -17,9 +17,6 @@ function start_spill()
         body: JSON.stringify(spiller_post) } )
             .then(response => { return response.json(); })
             .then(data => {
-                //document.getElementById("start_spill_c").innerHTML = 
-                //    `<p></p><button id="btn_ss_call" onclick="document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2);">Vis fullt rådata-svar</button>`;
-                //document.getElementById("btn_ss_call").addEventListener("click", () => { document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2); });
                 populer_handtabell(data);
                 populer_spiller_bid(data);
     });
@@ -29,13 +26,17 @@ function populer_spiller_bid(spillebord)
 {
     const player_turn = document.getElementById("p_action_bud_tag").textContent = "Spiller Øst";
     const player_turn_field1 = document.getElementById("bid_player");
-    for (spiller in spillebord)
-    {
+
+    // I declare exterminatus
+    while (player_turn_field1.options.length > 0) {
+        player_turn_field1.remove(0);
+    }
+
+    for (spiller in spillebord) {
         const sp_formoption = document.createElement("option");
         sp_formoption.value = spillebord[spiller].id;
         sp_formoption.textContent = spillebord[spiller].navn;
-        if (spiller == 2)
-        {
+        if (spiller == 3) { // Hardkoder VEST
             sp_formoption.setAttribute("selected", "selected");
         }
         player_turn_field1.appendChild(sp_formoption);
@@ -78,7 +79,7 @@ function gi_bud()
     let bid_post = {"rank": bid_rank, "suit": bid_suit};
 
     fetch(`/bridge/bid/${document.getElementById("bid_player").selectedIndex}`, {
-        method: "POST",
+        method: "PUT",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(bid_post) } )
             .then(response => { return response.json(); })

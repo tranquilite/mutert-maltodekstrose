@@ -94,15 +94,19 @@ async function endpoint_bridge_start(req: Request, resp: Response)
 }
 
 
+// Budregistreringshandler
+// Merk: Kunne vært en PUT-metode for semantikken, men er effektivt idempotent
+// med kontroll i Spilltilstand._gi_bud
 async function endpoint_bridge_bid_pid(req: Request, resp: Response)
 {
         try {
-            if (parseInt(req.params.player_id) == SPILL.get_budgiver()) {
-                let _bud: Bud = {
-                    rank: parseInt(req.body["bid_rank"]),
-                    bud: parseInt(req.body["bid_suit"])
-                }
-                SPILL._gi_bud(_bud);
+            const idx_p = SPILL.get_budgiver(parseInt(req.params.player_id));
+            let _bud: Bud = {
+                rank: parseInt(req.body["bid_rank"]),
+                bud: parseInt(req.body["bid_suit"])
+            }
+            if (SPILL._gi_bud(_bud, idx_p)) {
+                resp.send( {"event": "bud registrert"} );
             }
             else {
                 resp.send( {"error": "Wrong turn"} );
