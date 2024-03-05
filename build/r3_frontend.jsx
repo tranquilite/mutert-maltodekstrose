@@ -1,35 +1,41 @@
 // endless shitfuckery
 // "Brought to you by the australien government"
 // At denne fila måtte hete jsx er bare stress med .gitignore. Alt gjørt vondt.
-function start_spill() {
-    spillarr = [];
-    for (i = 1; i <= 4; i++) {  // smerte
-        spillarr.push(document.getElementById("spiller"+i.toString()).value);
+function start_spill()
+{
+    spillarr = {};
+    const tags = ["nord", "sor", "ost", "vest"];
+    for (idx_label in tags) {
+        spillarr[tags[idx_label]] = document.getElementById(tags[idx_label]).value;
     }
-const spiller_post = { "spillere": spillarr };
+    const spiller_post = { "spillere": spillarr };
 
-fetch("/bridge/start", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(spiller_post) } )
-        .then(response => { return response.json(); })
-        .then(data => {
-            //document.getElementById("start_spill_c").innerHTML = 
-            //    `<p></p><button id="btn_ss_call" onclick="document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2);">Vis fullt rådata-svar</button>`;
-            //document.getElementById("btn_ss_call").addEventListener("click", () => { document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2); });
-            populer_handtabell(data);
-            populer_spiller_bid(data);
-        });
+    fetch("/bridge/start",
+    {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(spiller_post) } )
+            .then(response => { return response.json(); })
+            .then(data => {
+                //document.getElementById("start_spill_c").innerHTML = 
+                //    `<p></p><button id="btn_ss_call" onclick="document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2);">Vis fullt rådata-svar</button>`;
+                //document.getElementById("btn_ss_call").addEventListener("click", () => { document.getElementById("start_spill_c").textContent = JSON.stringify(data, null, 2); });
+                populer_handtabell(data);
+                populer_spiller_bid(data);
+    });
 }
 
-function populer_spiller_bid(spillebord) {
+function populer_spiller_bid(spillebord)
+{
     const player_turn = document.getElementById("p_action_bud_tag").textContent = "Spiller Øst";
     const player_turn_field1 = document.getElementById("bid_player");
-    for (spiller in spillebord) {
+    for (spiller in spillebord)
+    {
         const sp_formoption = document.createElement("option");
         sp_formoption.value = spillebord[spiller].id;
         sp_formoption.textContent = spillebord[spiller].navn;
-        if (spiller == 2) {
+        if (spiller == 2)
+        {
             sp_formoption.setAttribute("selected", "selected");
         }
         player_turn_field1.appendChild(sp_formoption);
@@ -37,12 +43,15 @@ function populer_spiller_bid(spillebord) {
     }
 }
 
-function populer_handtabell(spillebord) {
+function populer_handtabell(spillebord)
+{
     const spha_t = document.getElementById("spiller_hand");
     const tbody = spha_t.getElementsByTagName('tbody')[0];
 
     // I declare exterminatus
-    while (tbody.firstChild) { tbody.removeChild(tbody.firstChild); }
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
 
     for (spiller in spillebord) {
         spiller = spillebord[spiller];  // ugly hack
@@ -61,24 +70,25 @@ function populer_handtabell(spillebord) {
     }
 }
 
-function gi_bud() {
+function gi_bud()
+{
     let bid_rank = document.getElementById("bid_rank").value;
     let bid_suit = document.getElementById("bid_suit").value;
     let player_turn = document.getElementById("p_action_bud_tag").textContent = "";
     let bid_post = {"rank": bid_rank, "suit": bid_suit};
 
     fetch(`/bridge/bid/${document.getElementById("bid_player").selectedIndex}`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(bid_post) } )
-        .then(response => { return response.json(); })
-        .then(data => {
-            if ( data == {"error": "Wrong turn"} ) {
-                console.log(data); 
-            } else {
-                // Handle shit.
-            }
-        })
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(bid_post) } )
+            .then(response => { return response.json(); })
+            .then(data => {
+                if ( data == {"error": "Wrong turn"} ) {
+                    console.log(data); 
+                } else {
+                    // Handle shit.
+                }
+    })
 
         var select = document.getElementById("bid_player");
         var selectedOption = select.querySelector("option[selected]");

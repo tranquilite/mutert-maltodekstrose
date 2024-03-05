@@ -29,10 +29,10 @@
     <div class="handling_c">
         <div class="endpoint">POST /bridge/start  {spillere: string[]} </div>
         <div id="spiller_input">
-            <div><label for="spiller">Nord</label><input type="text" id="spiller1" value="Jens"></div>
-            <div><label for="spiller2">Sør</label><input type="text" id="spiller2" value="Per"></div>
-            <div><label for="spiller3">Øst</label><input type="text" id="spiller3" value="Silje"></div>
-            <div><label for="spiller4">Vest</label><input type="text" id="spiller4" value="Thomesine"></div>
+            <div><label for="nord">Nord</label><input type="text" id="nord" value="Jens"></div>
+            <div><label for="sor">Sør</label><input type="text" id="sor" value="Per"></div>
+            <div><label for="ost">Øst</label><input type="text" id="ost" value="Silje"></div>
+            <div><label for="vest">Vest</label><input type="text" id="vest" value="Thomesine"></div>
             <div><p></p><button onclick="start_spill()">Start</button></div>
             <div id="start_spill_c" class="respons_c">&nbsp;</div>
         </div>
@@ -53,7 +53,7 @@
     <div class="handling_c">
         <h2>Budrunde</h2>
         <div class="endpoint">POST /bridge/start/:spiller_id  {id: number, bid: string} </div>
-        <p>Vi antar mapping Nord, Sør, Øst, Vest. Nord begynner alltid som dealer, så øst er først ut. <br>"todo: Tilfeldig tildeling følger senere"</p>
+        <p>Mr. Roboto er alltid dealer, så vi antar at vest alltid er første budgiver. <br>"todo: Tilfeldig tildeling følger senere"</p>
         <form id="p_action_bud" onsubmit="return false;">
             <p id="p_action_bud_tag">&nbsp;</p>
             <select id="bid_player">
