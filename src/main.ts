@@ -56,15 +56,19 @@ app.post("/bridge/start",
     (req: Request, resp: Response) => {
         let spillere: Spiller[] = [];
         const kortstokk = generer_kortstokk();
+        const _map_retning: { [key: string] : number } =  {"nord": 0, "sor": 1, "ost": 2, "vest": 3};
 
         try {
             const spillforesporsel = req.body["spillere"];
-            for (let i = 0; i < 4; i++)
+            const _retning: string[] = Object.keys(spillforesporsel);
             for (let i = 0; i < 4; i++) {
                 const hand = kortstokk.slice( (13*i), (13*(i+1)) );
-                spillere.push(new Spiller(spillforesporsel[i],
+                console.log(spillforesporsel);
+                spillere.push(new Spiller(spillforesporsel[_retning[i]],
                                           i*4, // "TODO: ag skikkelige id-er"
-                                          hand, i));
+                                          hand,
+                                          _map_retning[_retning[i]]
+                                         ));
             }
             SPILL.set_game_state(spillere, {});
             resp.send(spillere);

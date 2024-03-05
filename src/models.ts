@@ -8,8 +8,9 @@ export type Bud = {
 }
 
 export class Kort {
-    private farge: string;  // __slots__
-    private verdi: string;  // Etterligne py er .. stress
+    public readonly farge: string;  // __slots__
+    public readonly verdi: string;  // Etterligne py er .. stress
+    private __ranking: number;
 
     constructor(farge: string, verdi: string)
     {
@@ -19,6 +20,16 @@ export class Kort {
         }*/
         this.farge = farge;
         this.verdi = verdi;
+        this.__ranking = this._ranking_poeng();
+    }
+
+    _ranking_poeng(): number  // Wonka's secret magic recipe
+    {
+        const verdier: { [key: string]: number } = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12};
+        const farger: { [key: string]: number } = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3};
+        return verdier[this.verdi] + 13 * farger[this.farge];
+    }
+
     toString()
     {
         let verdi: string = "";
