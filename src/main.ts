@@ -28,15 +28,7 @@ function Trainwreck(err: any, resp_obj: Response, tree: string='NA')
 function generer_kortstokk()
 {
     let kortstokk: Kort[] = [];
-    /*let farger: string[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
-    let valor: string[] = ["2", "3", "4", "5", "6", "7", "8", "9",
-                           "10", "J","D", "K", "A"]
 
-    for (let farge of farger) {  // Hvis lat, overkompliser.
-        for (let verdi of valor) {
-            kortstokk.push(new Kort(farge, verdi));
-        }
-    }*/
 
     for (let num = 0; num <= 51; num++) {
         kortstokk.push(new Kort(num))
