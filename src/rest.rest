@@ -1,0 +1,18 @@
+GET http://localhost/ HTTP/1.1
+
+
+###
+POST http://localhost/bridge/start HTTP/1.1
+content-type: application/json
+
+{
+    "spillere": {
+        "north": "Jens",
+        "sor": "Pia",
+        "ost": "Trine"
+    }
+}
+
+
+###
+GET http://localhost/bridge/bid HTTP/1.1
